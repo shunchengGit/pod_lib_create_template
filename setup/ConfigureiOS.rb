@@ -13,29 +13,39 @@ module Pod
 
     def perform
 
-      keep_demo = configurator.ask_with_answers("Would you like to include a demo application with your library", ["Yes", "No"]).to_sym
+      # keep_demo = configurator.ask_with_answers("Would you like to include a demo application with your library", ["Yes", "No"]).to_sym
+      
+      keep_demo = "Yes".to_sym
 
-      framework = configurator.ask_with_answers("Which testing frameworks will you use", ["Specta", "Kiwi", "None"]).to_sym
-      case framework
-        when :specta
-          configurator.add_pod_to_podfile "Specta"
-          configurator.add_pod_to_podfile "Expecta"
+      # framework = configurator.ask_with_answers("Which testing frameworks will you use", ["Specta", "Kiwi", "None"]).to_sym
 
-          configurator.add_line_to_pch "@import Specta;"
-          configurator.add_line_to_pch "@import Expecta;"
+      framework = "None".to_sym
 
-          configurator.set_test_framework("specta", "m", "ios")
+      configurator.set_test_framework("xctest", "m", "ios")
 
-        when :kiwi
-          configurator.add_pod_to_podfile "Kiwi"
-          configurator.add_line_to_pch "@import Kiwi;"
-          configurator.set_test_framework("kiwi", "m", "ios")
+      # case framework
+      #   when :specta
+      #     configurator.add_pod_to_podfile "Specta"
+      #     configurator.add_pod_to_podfile "Expecta"
 
-        when :none
-          configurator.set_test_framework("xctest", "m", "ios")
-      end
+      #     configurator.add_line_to_pch "@import Specta;"
+      #     configurator.add_line_to_pch "@import Expecta;"
 
-      snapshots = configurator.ask_with_answers("Would you like to do view based testing", ["Yes", "No"]).to_sym
+      #     configurator.set_test_framework("specta", "m", "ios")
+
+      #   when :kiwi
+      #     configurator.add_pod_to_podfile "Kiwi"
+      #     configurator.add_line_to_pch "@import Kiwi;"
+      #     configurator.set_test_framework("kiwi", "m", "ios")
+
+      #   when :none
+      #     configurator.set_test_framework("xctest", "m", "ios")
+      # end
+
+      # snapshots = configurator.ask_with_answers("Would you like to do view based testing", ["Yes", "No"]).to_sym
+      
+      snapshots = "No".to_sym
+
       case snapshots
         when :yes
           configurator.add_pod_to_podfile "FBSnapshotTestCase"
@@ -52,17 +62,19 @@ module Pod
           end
       end
 
-      prefix = nil
+      # prefix = nil
 
-      loop do
-        prefix = configurator.ask("What is your class prefix")
+      # loop do
+      #   prefix = configurator.ask("What is your class prefix")
 
-        if prefix.include?(' ')
-          puts 'Your class prefix cannot contain spaces.'.red
-        else
-          break
-        end
-      end
+      #   if prefix.include?(' ')
+      #     puts 'Your class prefix cannot contain spaces.'.red
+      #   else
+      #     break
+      #   end
+      # end
+
+      prefix = ConfigureAcc.new().git_prefix
 
       Pod::ProjectManipulator.new({
         :configurator => @configurator,

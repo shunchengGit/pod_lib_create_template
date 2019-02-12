@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'colored2'
+require 'yaml'
 
 module Pod
   class TemplateConfigurator
@@ -11,6 +12,7 @@ module Pod
       @pods_for_podfile = []
       @prefixes = []
       @message_bank = MessageBank.new(self)
+      @acc_config = ConfigureAcc.new()
     end
 
     def ask(question)
@@ -70,21 +72,24 @@ module Pod
     def run
       @message_bank.welcome_message
 
-      platform = self.ask_with_answers("What platform do you want to use?", ["iOS", "macOS"]).to_sym
+      # platform = self.ask_with_answers("What platform do you want to use?", ["iOS", "macOS"]).to_sym
 
-      case platform
-        when :macos
-          ConfigureMacOSSwift.perform(configurator: self)
-        when :ios
-          framework = self.ask_with_answers("What language do you want to use?", ["Swift", "ObjC"]).to_sym
-          case framework
-            when :swift
-              ConfigureSwift.perform(configurator: self)
+      # case platform
+      #   when :macos
+      #     ConfigureMacOSSwift.perform(configurator: self)
+      #   when :ios
+      #     framework = self.ask_with_answers("What language do you want to use?", ["Swift", "ObjC"]).to_sym
+      #     case framework
+      #       when :swift
+      #         ConfigureSwift.perform(configurator: self)
 
-            when :objc
-              ConfigureIOS.perform(configurator: self)
-          end
-      end
+      #       when :objc
+      #         ConfigureIOS.perform(configurator: self)
+      #     end
+      # end
+      
+      ConfigureIOS.perform(configurator: self)
+
 
       replace_variables_in_files
       clean_template_files
@@ -133,6 +138,8 @@ module Pod
         text.gsub!("${USER_EMAIL}", user_email)
         text.gsub!("${YEAR}", year)
         text.gsub!("${DATE}", date)
+        text.gsub!("${GIT_HOME}", git_home)
+        text.gsub!("${GIT_SRC}", git_src)
         File.open(file_name, "w") { |file| file.puts text }
       end
     end
@@ -194,7 +201,11 @@ module Pod
     #----------------------------------------#
 
     def user_name
-      (ENV['GIT_COMMITTER_NAME'] || github_user_name || `git config user.name` || `<GITHUB_USERNAME>` ).strip
+      if @acc_config.user_name
+        return @acc_config.user_name
+      end
+
+      return (ENV['GIT_COMMITTER_NAME'] || github_user_name || `git config user.name` || `<GITHUB_USERNAME>` ).strip
     end
 
     def github_user_name
@@ -204,7 +215,11 @@ module Pod
     end
 
     def user_email
-      (ENV['GIT_COMMITTER_EMAIL'] || `git config user.email`).strip
+      if @acc_config.user_email
+        return @acc_config.user_email 
+      end
+
+      return (ENV['GIT_COMMITTER_EMAIL'] || `git config user.email`).strip
     end
 
     def year
@@ -218,6 +233,22 @@ module Pod
     def podfile_path
       'Example/Podfile'
     end
+
+    def git_home
+      if @acc_config.git_home
+        return @acc_config.git_home 
+      end
+
+      return "https://github.com/#{user_name}"
+    end
+
+    def git_src
+      if @acc_config.git_src
+        return @acc_config.git_src 
+      end
+
+      return "https://github.com/#{user_name}"
+    end 
 
     #----------------------------------------#
   end
