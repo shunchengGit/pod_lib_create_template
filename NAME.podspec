@@ -17,5 +17,9 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '8.0'
 
+  s.resource_bundle = {
+    '${POD_NAME}Resource' => ['${POD_NAME}.xcassets']
+	}
+
   s.source_files = '${POD_NAME}/Classes/**/*'
 end
