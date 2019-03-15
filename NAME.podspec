@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '8.0'
 
-  s.resource_bundle = {
+  s.resource_bundles = {
     '${POD_NAME}Resource' => ['${POD_NAME}/Assets/Images.xcassets']
   }
 
